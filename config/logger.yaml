@@ -1,0 +1,29 @@
+version: 1
+disable_existing_loggers: False
+formatters:
+  simple:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: simple
+    stream: ext://sys.stdout
+
+  debug_file_handler:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: simple
+    filename: debug.log
+    maxBytes: 50000000 # 50MB
+    backupCount: 2
+    encoding: utf8
+
+root:
+  level: INFO
+  handlers: [ debug_file_handler, console ]
+
+loggers:
+  "default":
+    level: DEBUG

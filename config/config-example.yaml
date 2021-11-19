@@ -1,0 +1,116 @@
+# Change this to show codes of pressed keys to put into macros field
+SHOW_KEY_CODES: False 
+
+macros:
+  "[90, 174, 0, 0, 0, 0]": 
+    action: toggle_profile
+    tooltip_result: True
+  "[90, 56, 0, 0, 0, 0]":
+    action: toggle_refresh_rate
+    tooltip_result: True
+  # "[90, 56, 0, 0, 0, 0]":
+  #   action: system_command
+  #   args: 
+  #     - "echo 'Hello'"
+  #   tooltip_result: True
+
+power_presets:
+  - name: Silent
+    # ryzenadj_presets: default_5900hx_battery
+    atrofac: 
+      profile: silent
+  - name: Performance
+    # ryzenadj_presets: default_5900hx_ac
+    atrofac: 
+      profile: performance
+  - name: Turbo
+    # ryzenadj_presets: performance
+    atrofac: 
+      profile: turbo
+  - name: NoROG Silent
+    ryzenadj_presets: norog
+    atrofac:
+      profile: silent
+      cpu: [0,0,20,30,35,50,80,100]
+      gpu: [0,0,10,20,45,65,80,100]
+  - name: NoROG
+    ryzenadj_presets: norog
+    atrofac:
+      profile: performance
+      cpu: [0,0,20,30,35,50,80,100]
+      gpu: [0,0,30,50,50,65,80,100]
+  - name: NoROG Duty
+    ryzenadj_presets: norog_duty
+    atrofac:
+      profile: performance
+      cpu: [0,20,20,40,50,65,80,100]
+      gpu: [0,20,30,50,50,65,80,100]
+  - name: Blowout
+    # ryzenadj_presets: performance
+    atrofac:
+      profile: turbo
+      cpu: [70,70,70,80,90,90,90,100]
+      gpu: [70,70,70,80,90,90,90,100]
+
+# Temps order: 30, 40, 50, 60, 70, 80, 90, 100 c    
+
+# Default were gathered after updating to latest AMD drivers and firmware and getting info with ryzenadj
+ryzenadj_presets:
+  norog:
+    name: NoROG
+    tctl-temp: 90
+
+  norog_duty:
+    name: NoROG Duty
+    tctl-temp: 90
+
+  default_5900hx_ac:
+    name: Default 5900HX AC
+    stapm-limit: 54
+    fast-limit: 65
+    slow-limit: 54
+    stapm-time: 275
+    slow-time: 5
+    apu-slow-limit: 54
+    vrm-current: 74
+    vrmsoc-current: 15
+    vrmmax-current: 127
+    vrmsocmax-current: 20
+    tctl-temp: 90
+  default_5900hx_battery:
+    name: Default 5900HX Battery
+    stapm-limit: 48
+    fast-limit: 59
+    slow-limit: 48
+    stapm-time: 275
+    slow-time: 5
+    apu-slow-limit: 48
+    vrm-current: 58
+    vrmsoc-current: 15
+    vrmmax-current: 110
+    vrmsocmax-current: 20
+    tctl-temp: 90
+  default:
+    name: Default
+    fast-limit: 65
+    slow-limit: 54
+    stapm-limit: 35
+    stapm-time: 200
+    slow-time: 5
+    tctl-temp: 97
+  performance:
+    name: Performance
+    fast-limit: 68
+    slow-limit: 58
+    stapm-limit: 40
+    stapm-time: 300
+    slow-time: 10
+    tctl-temp: 100
+  power_saver:
+    name: Power saver
+    fast-limit: 40
+    slow-limit: 35
+    stapm-limit: 25
+    stapm-time: 200
+    slow-time: 2
+    tctl-temp: 85
