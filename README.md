@@ -13,6 +13,10 @@ Developed and tested on G733QS.
 
 Relies on atrofac and ryzenadj (bundled). At the moment configuration is done through config file.
 
+## Goal
+
+The goal of the project is to provide an alternative to core Armoury Crate functions without unnecessary bloat. Primarily this means changing fan profiles, because it's not something you can easily do with other software, as far as I know.
+
 ## Features
 
 - Control fan profiles (silent, performance, turbo)
