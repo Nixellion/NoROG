@@ -34,7 +34,8 @@ The goal of the project is to provide an alternative to core Armoury Crate funct
 ## With Python
 
 1. Download and install Python from python.org (Version 3.8+)
-2. Run `norog.bat` file by double clicking it (it will `pip install` dependencies and run norog.py)
+2. Copy `config/config-example.yaml` file and rename copy to `config.yaml`. Open it and adjust to your liking.
+3. Run `norog.bat` file by double clicking it (it will `pip install` dependencies and run norog.py)
 
 ## Precompiled .exe
 
