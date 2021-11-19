@@ -29,7 +29,7 @@ Relies on atrofac and ryzenadj (bundled). At the moment configuration is done th
 
 ## With Python
 
-1. Download Python from python.org (Version 3.8+)
+1. Download and install Python from python.org (Version 3.8+)
 2. Run `norog.bat` file by double clicking it (it will `pip install` dependencies and run norog.py)
 
 ## Precompiled .exe
