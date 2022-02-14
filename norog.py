@@ -9,7 +9,7 @@ import pywinusb.hid as hid
 
 import yaml
 import time
-
+import shutil
 import profiles
 import threading
 
@@ -278,6 +278,13 @@ class SystemTrayIcon(QSystemTrayIcon):
         self.profileStatus.setEnabled(False)
         self.refreshRateStatus.setEnabled(False)
 
+
+        menu.addSeparator()
+
+        self.disableRogServicesAction = menu.addAction("Disable ROG Services")
+        self.disableRogServicesAction.triggered.connect(self.disableRogServices)
+
+        menu.addSeparator()
         self.exitAction = menu.addAction("Exit")
         self.exitAction.triggered.connect(self.exitApp)
         self.setContextMenu(menu)
@@ -288,6 +295,25 @@ class SystemTrayIcon(QSystemTrayIcon):
 
         self.rsg_window = rsg_window
 
+    def disableRogServices(self):
+        p = f"C:\Windows\System32\ASUSACCI"
+        fnames = ['ArmouryCrateKeyControl.exe', 'ArmouryCrateControlInterface.exe']
+
+        for fname in fnames:
+            try:
+                target_name = fname + ".norog_disabled"
+                sourcepath = os.path.join(p, fname)
+                targetpath = os.path.join(p, target_name)
+
+                if os.path.exists(sourcepath):
+                    if os.path.exists(targetpath):
+                        os.remove(targetpath)
+                    shutil.move(sourcepath, targetpath)
+                    print (f"Moved {sourcepath} to {sourcepath}.")
+                else:
+                    print (f"{sourcepath} does not exist, skip.")
+            except Exception as e:
+                print (f"Can't disable {fname}, {e}")
 
     def activate(self, reason):
         if reason == QSystemTrayIcon.Trigger:
@@ -348,7 +374,7 @@ class CaptureThread(QtCore.QThread):
         if key in macros:
             macro_data = macros[key]
             macro_function = getattr(macro_actions, macro_data['action'])
-            macro_info = yaml.load(macro_function.__doc__)
+            macro_info = yaml.safe_load(macro_function.__doc__)
             log.info(f"ACTION: {macro_info['name']}")
 
             macro_tooltip_show = macro_data.get("tooltip_result")
