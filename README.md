@@ -37,6 +37,20 @@ The goal of the project is to provide an alternative to core Armoury Crate funct
 2. Copy `config/config-example.yaml` file and rename copy to `config.yaml`. Open it and adjust to your liking.
 3. Run `norog.bat` file by double clicking it (it will `pip install` dependencies and run norog.py)
 
+### How to disable console window
+
+If you want to disable console window that shows the log it's possible to do that. 
+
+1. Make a copy of `norog.bat` file, you can call it anything, for example `norog_noconsole.bat`.
+2. Change the second line from `python %~dp0\norog.py` to `C:\<path to your python installation>\pythonw.exe %~dp0\norog.py`
+3. (Optional) You can additionally remove the first line if you want to skip dependency checking on every startup. Or you can write `@REM` in front of it to disable\comment it out, like this `@REM pip install -r %~dp0\requirements.txt`
+
+Use this `.bat` file to start norog, and in Task Scheduler.
+
+### How to make it start faster, skip checking for installed modules
+
+The default `norog.bat` runs dependency check and installs required python modules. There's no reason to do it every time, for that you can use `norog_no_dependency_check.bat` instead.
+
 ## Precompiled .exe
 
 WIP
