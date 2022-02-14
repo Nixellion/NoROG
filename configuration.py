@@ -6,7 +6,7 @@ from paths import CONFIG_DIR, DATA_DIR
 
 def read_config(name="config"):
     with open(os.path.join(CONFIG_DIR, name+".yaml"), "r") as f:
-        data = yaml.load(f.read())
+        data = yaml.safe_load(f.read())
     return data
 
 def write_config(data, name="config"):
