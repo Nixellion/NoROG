@@ -1,8 +1,12 @@
-
+import os
+import sys
+STDOUT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs", "stdout.log")
+sys.stdout = open(STDOUT_PATH, 'w+')
 
 # from typing import KeysView
 from debug import get_logger
 log = get_logger("default")
+
 
 from time import sleep
 import pywinusb.hid as hid
@@ -23,7 +27,6 @@ config = main_config
 SHOW_KEY_CODES = config['SHOW_KEY_CODES']
 # region UI
 
-import sys, os
 
 from PySide2.QtGui import QIcon#, QFontDatabase, QFont
 # from PySide2.QtCore import QFile, QTextStream, QTranslator, QLocale
@@ -31,8 +34,7 @@ from PySide2.QtWidgets import QApplication
 
 from paths import  APP_DIR
 
-import os
-import sys
+
 
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
@@ -185,36 +187,48 @@ class BroToolsTipIssue(QMainWindow):
     #         QWidget.closeEvent(self, event)
 
 
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.loadedFile = None
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         # self.clipboard = QClipboard()
 
         self.appIcon = QIcon(os.path.join(APP_DIR, 'icon.png'))
         self.setWindowIcon(self.appIcon)
 
         self.mainLayout = QVBoxLayout()
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+        # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        # self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
 
         self.mainWidget = QWidget()
         self.mainWidget.setLayout(self.mainLayout)
         self.setCentralWidget(self.mainWidget)
-        self.setWindowTitle("Stuff")
+        self.setWindowTitle("NoROG Main Window")
 
         #self.setStyleSheet(qss)
+        self.logField = QTextBrowser()
+        self.mainLayout.addWidget(self.logField)
 
         self.captureThread = CaptureThread(self)
         self.captureThread.signal_event.sig.connect(partial(self.showToast))
         self.captureThread.start()
 
+        self.logTimer = QtCore.QTimer(self)
+        self.logTimer.timeout.connect(self.readLog)
+        self.logTimer.start(2000)
+
         self.timer = None
 
         self.resize(600, 600)
+
+    def readLog(self):
+        if self.isVisible():
+            with open(STDOUT_PATH, "r") as f:
+                self.logField.setText(f.read())
+            self.logField.moveCursor(QTextCursor.End)
 
     def buttonClicked(self, number):
         print (f"Button {number} clicked")
@@ -412,11 +426,11 @@ def main():
     mw = MainWindow()
     # mw.show()
 
-    trayIcon = SystemTrayIcon(QIcon(os.path.join(APP_DIR, 'icon.png')), app=app)
+    trayIcon = SystemTrayIcon(QIcon(os.path.join(APP_DIR, 'icon.png')), parent=mw, app=app)
     mw.trayIcon = trayIcon
     print ("Show tray icon")
     trayIcon.show()
-
+    
     sys.exit(app.exec_())
 
 
