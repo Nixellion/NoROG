@@ -26,6 +26,12 @@ powercfg:
     - efficient_agressive_at_guaranteed
 
 power_presets:
+  # - name: Power Saver Silent No GPU
+  #   atrofac:
+  #     profile: silent
+  #   powercfg:
+  #     boost_mode: disabled
+  #     dgpu_disabled: true
   - name: Power Saver
     atrofac:
       profile: silent
