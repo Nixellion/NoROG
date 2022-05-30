@@ -140,13 +140,13 @@ def toggle_display_refreshrate():
     CURRENT_REFRESH_RATE = cache_file.get("CURRENT_REFRESH_RATE")
 
     if CURRENT_REFRESH_RATE is None:
-        cache_file.set("CURRENT_REFRESH_RATE", 300)   
-        CURRENT_REFRESH_RATE = 300
+        cache_file.set("CURRENT_REFRESH_RATE", main_config['display']['max_refreshrate'])   
+        CURRENT_REFRESH_RATE = main_config['display']['max_refreshrate']
 
-    if CURRENT_REFRESH_RATE == 300:
-        cache_file.set("CURRENT_REFRESH_RATE", 60)   
-    elif CURRENT_REFRESH_RATE == 60:
-        cache_file.set("CURRENT_REFRESH_RATE", 300) 
+    if CURRENT_REFRESH_RATE == main_config['display']['max_refreshrate']:
+        cache_file.set("CURRENT_REFRESH_RATE", main_config['display']['min_refreshrate'])   
+    elif CURRENT_REFRESH_RATE == main_config['display']['min_refreshrate']:
+        cache_file.set("CURRENT_REFRESH_RATE", main_config['display']['max_refreshrate']) 
 
     REFRESH_RATE_DIRTY = True
     return cache_file.get("CURRENT_REFRESH_RATE")

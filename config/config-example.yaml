@@ -1,6 +1,10 @@
 # Change this to show codes of pressed keys to put into macros field
 SHOW_KEY_CODES: False 
 
+display:
+  max_refreshrate: 300
+  min_refreshrate: 60
+
 macros:
   "[90, 174, 0, 0, 0, 0]": 
     action: toggle_profile
