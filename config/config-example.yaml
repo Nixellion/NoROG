@@ -24,6 +24,8 @@ powercfg:
     - efficient_agressive
     - agressive_at_guaranteed
     - efficient_agressive_at_guaranteed
+  #gpu_instance_path: PCI\VEN_XXX&DEV_XXX&SUBSYS_XXXXXX&REV_A1\XXXXXXXXXXXXX
+
 
 power_presets:
   # - name: Power Saver Silent No GPU
