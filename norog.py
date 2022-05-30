@@ -225,6 +225,9 @@ class MainWindow(QMainWindow):
         self.resize(600, 600)
 
     def readLog(self):
+        if not os.path.exists(STDOUT_PATH):
+            with open(STDOUT_PATH, "w+") as f:
+                f.write("")
         if self.isVisible():
             with open(STDOUT_PATH, "r") as f:
                 self.logField.setText(f.read())
