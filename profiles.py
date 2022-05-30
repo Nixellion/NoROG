@@ -64,10 +64,28 @@ if cache_file.get("CURRENT_PROFILE") is None:
 else:
     first_launch = False
 
+# Maximum CPU frequency
+# powercfg /setdcvalueindex SCHEME_CURRENT 54533251-82be-4824-96c1-47b60b740d00 75b0ae3f-bce0-45a7-8c89-c9611c25e100 0
+
 def apply_powercfg_profile(profile_data):
     cmd = f"powercfg /SETDCVALUEINDEX SCHEME_CURRENT SUB_PROCESSOR PERFBOOSTMODE {main_config['powercfg']['boost_modes'].index(profile_data['boost_mode'])}"
     log.info(f"apply_powercfg_profile: {cmd}")
     log.info(check_output(cmd, shell=True))
+
+    cmd = f"powercfg /SETACVALUEINDEX SCHEME_CURRENT SUB_PROCESSOR PERFBOOSTMODE {main_config['powercfg']['boost_modes'].index(profile_data['boost_mode'])}"
+    log.info(f"apply_powercfg_profile: {cmd}")
+    log.info(check_output(cmd, shell=True))
+
+    if main_config['powercfg'].get('gpu_instance_path') is not None:
+        try:
+            if profile_data.get('dgpu_disabled', False) is True:
+                cmd = 'pnputil /disable-device "{}"'.format(main_config['powercfg']['gpu_instance_path'])
+            else:
+                cmd = 'pnputil /enable-device "{}"'.format(main_config['powercfg']['gpu_instance_path'])
+            log.info(f"apply_powercfg_profile: {cmd}")
+            log.info(check_output(cmd, shell=True))
+        except Exception as e:
+            log.info(e)
 
 def toggle_profile():
     """

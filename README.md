@@ -75,3 +75,34 @@ To make it auto-start with Windows in it's current state you should use Task Sch
 - [ ] Support changing GPU modes, performance\power saving
 - [ ] Support switching to iGPU (disabling discrete GPU)
 - [ ] GUI
+
+
+# Dev notes
+
+```
+const SW_DYNAMC_GRAPHICS = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+const GLOBAL_SETTINGS = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+const AC = '/setacvalueindex';
+const DC = '/setdcvalueindex';
+
+powercfg /getactivescheme
+
+powercfg /q ${result.guid} ${SW_DYNAMC_GRAPHICS} ${GLOBAL_SETTINGS}
+powercfg /q xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+powercfg ${AC} ${result.guid} ${SW_DYNAMC_GRAPHICS} ${GLOBAL_SETTINGS} ${setting}
+
+Power Scheme GUID: xxxxxxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  (High performance)
+  GUID Alias: SCHEME_MIN
+  Subgroup GUID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  (Switchable Dynamic Graphics)
+    Power Setting GUID: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  (Global Settings)
+      Possible Setting Index: 000
+      Possible Setting Friendly Name: Force power-saving graphics
+      Possible Setting Index: 001
+      Possible Setting Friendly Name: Optimize power savings
+      Possible Setting Index: 002
+      Possible Setting Friendly Name: Optimize performance
+      Possible Setting Index: 003
+      Possible Setting Friendly Name: Maximize performance
+    Current AC Power Setting Index: 0x00000002
+    Current DC Power Setting Index: 0x00000001
+```
