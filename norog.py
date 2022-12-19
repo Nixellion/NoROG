@@ -1,15 +1,19 @@
-
+import os
+import sys
+STDOUT_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "logs", "stdout.log")
+sys.stdout = open(STDOUT_PATH, 'w+')
 
 # from typing import KeysView
 from debug import get_logger
 log = get_logger("default")
+
 
 from time import sleep
 import pywinusb.hid as hid
 
 import yaml
 import time
-
+import shutil
 import profiles
 import threading
 
@@ -23,7 +27,6 @@ config = main_config
 SHOW_KEY_CODES = config['SHOW_KEY_CODES']
 # region UI
 
-import sys, os
 
 from PySide2.QtGui import QIcon#, QFontDatabase, QFont
 # from PySide2.QtCore import QFile, QTextStream, QTranslator, QLocale
@@ -31,8 +34,7 @@ from PySide2.QtWidgets import QApplication
 
 from paths import  APP_DIR
 
-import os
-import sys
+
 
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
@@ -185,36 +187,51 @@ class BroToolsTipIssue(QMainWindow):
     #         QWidget.closeEvent(self, event)
 
 
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.loadedFile = None
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         # self.clipboard = QClipboard()
 
         self.appIcon = QIcon(os.path.join(APP_DIR, 'icon.png'))
         self.setWindowIcon(self.appIcon)
 
         self.mainLayout = QVBoxLayout()
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+        # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        # self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
 
 
         self.mainWidget = QWidget()
         self.mainWidget.setLayout(self.mainLayout)
         self.setCentralWidget(self.mainWidget)
-        self.setWindowTitle("Stuff")
+        self.setWindowTitle("NoROG Main Window")
 
         #self.setStyleSheet(qss)
+        self.logField = QTextBrowser()
+        self.mainLayout.addWidget(self.logField)
 
         self.captureThread = CaptureThread(self)
         self.captureThread.signal_event.sig.connect(partial(self.showToast))
         self.captureThread.start()
 
+        self.logTimer = QtCore.QTimer(self)
+        self.logTimer.timeout.connect(self.readLog)
+        self.logTimer.start(2000)
+
         self.timer = None
 
         self.resize(600, 600)
+
+    def readLog(self):
+        if not os.path.exists(STDOUT_PATH):
+            with open(STDOUT_PATH, "w+") as f:
+                f.write("")
+        if self.isVisible():
+            with open(STDOUT_PATH, "r") as f:
+                self.logField.setText(f.read())
+            self.logField.moveCursor(QTextCursor.End)
 
     def buttonClicked(self, number):
         print (f"Button {number} clicked")
@@ -278,6 +295,13 @@ class SystemTrayIcon(QSystemTrayIcon):
         self.profileStatus.setEnabled(False)
         self.refreshRateStatus.setEnabled(False)
 
+
+        menu.addSeparator()
+
+        self.disableRogServicesAction = menu.addAction("Disable ROG Services")
+        self.disableRogServicesAction.triggered.connect(self.disableRogServices)
+
+        menu.addSeparator()
         self.exitAction = menu.addAction("Exit")
         self.exitAction.triggered.connect(self.exitApp)
         self.setContextMenu(menu)
@@ -288,6 +312,25 @@ class SystemTrayIcon(QSystemTrayIcon):
 
         self.rsg_window = rsg_window
 
+    def disableRogServices(self):
+        p = f"C:\Windows\System32\ASUSACCI"
+        fnames = ['ArmouryCrateKeyControl.exe', 'ArmouryCrateControlInterface.exe']
+
+        for fname in fnames:
+            try:
+                target_name = fname + ".norog_disabled"
+                sourcepath = os.path.join(p, fname)
+                targetpath = os.path.join(p, target_name)
+
+                if os.path.exists(sourcepath):
+                    if os.path.exists(targetpath):
+                        os.remove(targetpath)
+                    shutil.move(sourcepath, targetpath)
+                    print (f"Moved {sourcepath} to {sourcepath}.")
+                else:
+                    print (f"{sourcepath} does not exist, skip.")
+            except Exception as e:
+                print (f"Can't disable {fname}, {e}")
 
     def activate(self, reason):
         if reason == QSystemTrayIcon.Trigger:
@@ -348,7 +391,7 @@ class CaptureThread(QtCore.QThread):
         if key in macros:
             macro_data = macros[key]
             macro_function = getattr(macro_actions, macro_data['action'])
-            macro_info = yaml.load(macro_function.__doc__)
+            macro_info = yaml.safe_load(macro_function.__doc__)
             log.info(f"ACTION: {macro_info['name']}")
 
             macro_tooltip_show = macro_data.get("tooltip_result")
@@ -386,11 +429,11 @@ def main():
     mw = MainWindow()
     # mw.show()
 
-    trayIcon = SystemTrayIcon(QIcon(os.path.join(APP_DIR, 'icon.png')), app=app)
+    trayIcon = SystemTrayIcon(QIcon(os.path.join(APP_DIR, 'icon.png')), parent=mw, app=app)
     mw.trayIcon = trayIcon
     print ("Show tray icon")
     trayIcon.show()
-
+    
     sys.exit(app.exec_())
 
 

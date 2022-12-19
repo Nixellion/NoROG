@@ -1,6 +1,10 @@
 # Change this to show codes of pressed keys to put into macros field
 SHOW_KEY_CODES: False 
 
+display:
+  max_refreshrate: 300
+  min_refreshrate: 60
+
 macros:
   "[90, 174, 0, 0, 0, 0]": 
     action: toggle_profile
@@ -14,19 +18,49 @@ macros:
   #     - "echo 'Hello'"
   #   tooltip_result: True
 
+# Holds information and settings about powercfg, generally not needed to be edited by the user
+# boost_modes corresponds to the order\enum number of boost mode profile for `powercfg /SETDCVALUEINDEX SCHEME_CURRENT SUB_PROCESSOR PERFBOOSTMODE X` command
+powercfg:
+  boost_modes:
+    - disabled
+    - enabled
+    - agressive
+    - efficient_agressive
+    - agressive_at_guaranteed
+    - efficient_agressive_at_guaranteed
+  #gpu_instance_path: PCI\VEN_XXX&DEV_XXX&SUBSYS_XXXXXX&REV_A1\XXXXXXXXXXXXX
+
+
 power_presets:
+  # - name: Power Saver Silent No GPU
+  #   atrofac:
+  #     profile: silent
+  #   powercfg:
+  #     boost_mode: disabled
+  #     dgpu_disabled: true
+  - name: Power Saver
+    atrofac:
+      profile: silent
+    powercfg:
+      boost_mode: disabled
   - name: Silent
     # ryzenadj_presets: default_5900hx_battery
     atrofac: 
       profile: silent
+    powercfg:
+      boost_mode: enabled
   - name: Performance
     # ryzenadj_presets: default_5900hx_ac
     atrofac: 
       profile: performance
+    powercfg:
+      boost_mode: efficient_agressive
   - name: Turbo
     # ryzenadj_presets: performance
     atrofac: 
       profile: turbo
+    powercfg:
+      boost_mode: agressive
   - name: NoROG Silent
     ryzenadj_presets: norog
     atrofac:

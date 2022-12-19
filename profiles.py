@@ -25,7 +25,12 @@ REFRESH_RATE_DIRTY = False
 def format_atrofac_curve(c):
     return f"30c:{c[0]}%,40c:{c[1]}%,50c:{c[2]}%,60c:{c[3]}%,70c:{c[4]}%,80c:{c[5]}%,90c:{c[6]}%,100c:{c[7]}%"
 
-def apply_atrofac_profile(profile, cpu_curve, gpu_curve):
+def apply_atrofac_profile(profile_data):
+
+    profile = profile_data.get("profile")
+    cpu_curve = profile_data.get("cpu")
+    gpu_curve = profile_data.get("gpu")
+
     if not cpu_curve and not cpu_curve:
         cmd = f"{atrofac_cli} plan {profile}"
     else:
@@ -37,8 +42,8 @@ def apply_atrofac_profile(profile, cpu_curve, gpu_curve):
     if gpu_curve:
         cmd += " --gpu "+format_atrofac_curve(gpu_curve)
 
-    log.info(f"set_atrofac_profile: {cmd}")
-    log.info(check_output(cmd))
+    log.info(f"apply_atrofac_profile: {cmd}")
+    log.info(check_output(cmd, shell=True))
 
 def apply_ryzenadj_profile(profile_data):
     log.info(f"set_ryzenadj_profile: {profile_data}")
@@ -49,8 +54,9 @@ def apply_ryzenadj_profile(profile_data):
             if milliwatts % 1000000 == 0:
                 milliwatts = milliwatts / 1000;
             cmd += f" --{key}={milliwatts}"
-    log.info(f"set_ryzenadj_profile cmd: {cmd}")
-    print(str(os.system(cmd)))
+    log.info(f"apply_ryzenadj_profile cmd: {cmd}")
+    log.info(check_output(cmd, shell=True))
+    # print(str(os.system(cmd)))
 
 if cache_file.get("CURRENT_PROFILE") is None:
     cache_file.set("CURRENT_PROFILE", 0)
@@ -58,7 +64,28 @@ if cache_file.get("CURRENT_PROFILE") is None:
 else:
     first_launch = False
 
+# Maximum CPU frequency
+# powercfg /setdcvalueindex SCHEME_CURRENT 54533251-82be-4824-96c1-47b60b740d00 75b0ae3f-bce0-45a7-8c89-c9611c25e100 0
 
+def apply_powercfg_profile(profile_data):
+    cmd = f"powercfg /SETDCVALUEINDEX SCHEME_CURRENT SUB_PROCESSOR PERFBOOSTMODE {main_config['powercfg']['boost_modes'].index(profile_data['boost_mode'])}"
+    log.info(f"apply_powercfg_profile: {cmd}")
+    log.info(check_output(cmd, shell=True))
+
+    cmd = f"powercfg /SETACVALUEINDEX SCHEME_CURRENT SUB_PROCESSOR PERFBOOSTMODE {main_config['powercfg']['boost_modes'].index(profile_data['boost_mode'])}"
+    log.info(f"apply_powercfg_profile: {cmd}")
+    log.info(check_output(cmd, shell=True))
+
+    if main_config['powercfg'].get('gpu_instance_path') is not None:
+        try:
+            if profile_data.get('dgpu_disabled', False) is True:
+                cmd = 'pnputil /disable-device "{}"'.format(main_config['powercfg']['gpu_instance_path'])
+            else:
+                cmd = 'pnputil /enable-device "{}"'.format(main_config['powercfg']['gpu_instance_path'])
+            log.info(f"apply_powercfg_profile: {cmd}")
+            log.info(check_output(cmd, shell=True))
+        except Exception as e:
+            log.info(e)
 
 def toggle_profile():
     """
@@ -92,7 +119,9 @@ def apply_current_profile():
         if key == "ryzenadj_presets":
             apply_ryzenadj_profile(main_config['ryzenadj_presets'][value])
         elif key == "atrofac":
-            apply_atrofac_profile(value.get('profile'), value.get('cpu'), value.get('gpu'))
+            apply_atrofac_profile(value)
+        elif key == "powercfg":
+            apply_powercfg_profile(value)
 
     PROFILE_DIRTY = False
     return main_config['power_presets'][CURRENT_PROFILE]['name']
@@ -111,13 +140,13 @@ def toggle_display_refreshrate():
     CURRENT_REFRESH_RATE = cache_file.get("CURRENT_REFRESH_RATE")
 
     if CURRENT_REFRESH_RATE is None:
-        cache_file.set("CURRENT_REFRESH_RATE", 300)   
-        CURRENT_REFRESH_RATE = 300
+        cache_file.set("CURRENT_REFRESH_RATE", main_config['display']['max_refreshrate'])   
+        CURRENT_REFRESH_RATE = main_config['display']['max_refreshrate']
 
-    if CURRENT_REFRESH_RATE == 300:
-        cache_file.set("CURRENT_REFRESH_RATE", 60)   
-    elif CURRENT_REFRESH_RATE == 60:
-        cache_file.set("CURRENT_REFRESH_RATE", 300) 
+    if CURRENT_REFRESH_RATE == main_config['display']['max_refreshrate']:
+        cache_file.set("CURRENT_REFRESH_RATE", main_config['display']['min_refreshrate'])   
+    elif CURRENT_REFRESH_RATE == main_config['display']['min_refreshrate']:
+        cache_file.set("CURRENT_REFRESH_RATE", main_config['display']['max_refreshrate']) 
 
     REFRESH_RATE_DIRTY = True
     return cache_file.get("CURRENT_REFRESH_RATE")
