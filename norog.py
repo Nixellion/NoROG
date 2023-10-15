@@ -301,6 +301,12 @@ class SystemTrayIcon(QSystemTrayIcon):
         self.disableRogServicesAction = menu.addAction("Disable ROG Services")
         self.disableRogServicesAction.triggered.connect(self.disableRogServices)
 
+        self.disableftpmAction = menu.addAction("Disable fTPM (Win 11 stutter fix)")
+        self.disableftpmAction.triggered.connect(self.disableFTPM)
+
+        self.restoreftpmAction = menu.addAction("Restore fTPM")
+        self.restoreftpmAction.triggered.connect(self.restoreFTPM)
+
         menu.addSeparator()
         self.exitAction = menu.addAction("Exit")
         self.exitAction.triggered.connect(self.exitApp)
@@ -326,11 +332,37 @@ class SystemTrayIcon(QSystemTrayIcon):
                     if os.path.exists(targetpath):
                         os.remove(targetpath)
                     shutil.move(sourcepath, targetpath)
-                    print (f"Moved {sourcepath} to {sourcepath}.")
+                    log.info (f"Moved {sourcepath} to {sourcepath}.")
                 else:
-                    print (f"{sourcepath} does not exist, skip.")
+                    log.info (f"{sourcepath} does not exist, skip.")
             except Exception as e:
-                print (f"Can't disable {fname}, {e}")
+                log.info (f"Can't disable {fname}, {e}")
+
+    def disableFTPM(self):
+        log.info("Started scanning...")
+        for root, dirs, files in os.walk("C:\\", topdown=False):
+            for name in files:
+                if name == "tpm.sys":
+                    filepath = os.path.join(root, name)
+                    new_path = os.path.join(root, "tpm_sys_norog_disabled.bak")
+                    if os.path.exists(new_path):
+                        log.info(f"Removed existing backup: {new_path}")
+                        os.remove(new_path)
+                    os.rename(filepath, new_path)
+                    log.info(f"Moved: {filepath} ==> {new_path}")
+
+    def restoreFTPM(self):
+        log.info("Started scanning...")
+        for root, dirs, files in os.walk("C:\\", topdown=False):
+            for name in files:
+                if name == "tpm_sys_norog_disabled.bak":
+                    filepath = os.path.join(root, name)
+                    new_path = os.path.join(root, "tpm.sys")
+                    if os.path.exists(new_path):
+                        log.info(f"Removed existing tpm.sys: {new_path}")
+                        os.remove(new_path)
+                    os.rename(filepath, new_path)
+                    log.info(f"Restored: {filepath} ==> {new_path}")
 
     def activate(self, reason):
         if reason == QSystemTrayIcon.Trigger:
